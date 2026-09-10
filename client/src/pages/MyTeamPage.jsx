@@ -14,9 +14,13 @@ import {
   AlertCircle,
   Loader2,
   Users,
-  FileText
+  FileText,
+  UserPlus,
+  Trash2,
+  Building2,
 } from 'lucide-react';
 import { NocDownloadButton } from '../components/NocDownloadButton';
+import { MemberModal } from '../components/MemberModal';
 
 export function MyTeamPage() {
   const { userProfile, role, logout, clerkToken, refreshProfile, setUserProfile } = useAuthContext();
@@ -40,10 +44,64 @@ export function MyTeamPage() {
   const [uploadingPpt, setUploadingPpt] = useState(false);
   const [pptSuccessMsg, setPptSuccessMsg] = useState('');
 
+  // Member Management Modal State (Lead Only)
+  const [isMemberModalOpen, setIsMemberModalOpen] = useState(false);
+  const [memberToEdit, setMemberToEdit] = useState(null);
+  const [removingMemberId, setRemovingMemberId] = useState(null);
+
   // Event Info for NOC
   const [eventInfo, setEventInfo] = useState({});
 
   const isLead = userProfile?.role === 'lead' || userProfile?.role === 'admin';
+
+  const handleOpenAddMember = () => {
+    setMemberToEdit(null);
+    setIsMemberModalOpen(true);
+  };
+
+  const handleOpenEditMember = (member) => {
+    setMemberToEdit(member);
+    setIsMemberModalOpen(true);
+  };
+
+  const handleSaveMember = async (memberData) => {
+    if (memberToEdit?._id) {
+      const updated = await apiRequest(`/teams/me/members/${memberToEdit._id}`, {
+        method: 'PATCH',
+        data: memberData,
+      });
+      setTeam(updated);
+      if (memberToEdit.email === userProfile?.email) {
+        setUserProfile((prev) => ({ ...prev, ...memberData }));
+      }
+    } else {
+      const updated = await apiRequest('/teams/me/members', {
+        method: 'POST',
+        data: memberData,
+      });
+      setTeam(updated);
+    }
+    refreshProfile();
+  };
+
+  const handleRemoveMember = async (member) => {
+    if (!window.confirm(`Are you sure you want to remove ${member.name} (${member.email}) from this team roster?`)) {
+      return;
+    }
+
+    setRemovingMemberId(member._id);
+    try {
+      const updated = await apiRequest(`/teams/me/members/${member._id}`, {
+        method: 'DELETE',
+      });
+      setTeam(updated);
+      refreshProfile();
+    } catch (err) {
+      alert(err.message || 'Failed to remove team member.');
+    } finally {
+      setRemovingMemberId(null);
+    }
+  };
 
   const fetchMyTeam = async () => {
     setLoading(true);
@@ -346,105 +404,139 @@ export function MyTeamPage() {
               {/* Members Panel */}
               <div className="panel" style={{ padding: 26 }}>
                 <div
-                  className="mono dim"
-                  style={{ fontSize: 11, letterSpacing: '.08em', marginBottom: 12 }}
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginBottom: 16,
+                  }}
                 >
-                  TEAM MEMBERS ({allMembers.length})
+                  <div
+                    className="mono dim"
+                    style={{ fontSize: 11, letterSpacing: '.08em' }}
+                  >
+                    TEAM MEMBERS ({allMembers.length}/5)
+                  </div>
+                  {isLead && allMembers.length < 5 && (
+                    <button
+                      onClick={handleOpenAddMember}
+                      className="btn btn-primary text-xs py-1 px-3 flex items-center gap-1.5"
+                    >
+                      <UserPlus className="w-3.5 h-3.5" />
+                      <span>Add Member</span>
+                    </button>
+                  )}
                 </div>
 
-                <div>
+                <div className="space-y-3">
                   {allMembers.map((member, idx) => {
                     const isCurrentUser = member.email === userProfile?.email;
 
                     return (
                       <div
                         key={member._id || idx}
-                        style={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
-                          padding: '14px 0',
-                          borderBottom: '1px solid var(--border)',
-                        }}
+                        className="p-3.5 border border-[var(--border)] rounded bg-black/40 hover:border-[var(--red2)]/60 transition-colors"
                       >
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                          <div
-                            style={{
-                              width: 36,
-                              height: 36,
-                              borderRadius: 4,
-                              background: member.isLead ? 'var(--grad)' : 'var(--bg-alt)',
-                              border: '1px solid var(--border)',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              fontFamily: 'var(--mono)',
-                              fontSize: 12,
-                              fontWeight: 700,
-                              color: 'var(--white)',
-                            }}
-                          >
-                            {member.name ? member.name.charAt(0).toUpperCase() : 'M'}
-                          </div>
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                          <div className="flex items-start sm:items-center gap-3 min-w-0">
+                            <div
+                              style={{
+                                width: 38,
+                                height: 38,
+                                borderRadius: 4,
+                                background: member.isLead ? 'var(--grad)' : 'var(--bg-alt)',
+                                border: '1px solid var(--border)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontFamily: 'var(--mono)',
+                                fontSize: 13,
+                                fontWeight: 700,
+                                color: 'var(--white)',
+                                flexShrink: 0,
+                              }}
+                            >
+                              {member.name ? member.name.charAt(0).toUpperCase() : 'M'}
+                            </div>
 
-                          <div>
-                            <div style={{ fontSize: 14.5, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 8 }}>
-                              {isCurrentUser && isEditingOwnName ? (
-                                <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                                  <input
-                                    type="text"
-                                    value={newOwnName}
-                                    onChange={(e) => setNewOwnName(e.target.value)}
-                                    className="px-2 py-1 text-xs"
-                                    style={{ width: 140 }}
-                                  />
-                                  <button
-                                    onClick={handleSaveOwnName}
-                                    disabled={savingOwnName}
-                                    className="btn btn-primary text-[10px] py-0.5 px-2"
-                                  >
-                                    Save
-                                  </button>
-                                  <button
-                                    onClick={() => setIsEditingOwnName(false)}
-                                    className="text-[10px] dim px-1"
-                                  >
-                                    ✕
-                                  </button>
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className="font-bold text-sm text-white">{member.name}</span>
+                                {member.isLead ? (
+                                  <span className="badge live">Team Lead</span>
+                                ) : (
+                                  <span className="badge">Member</span>
+                                )}
+                                {isCurrentUser && (
+                                  <span className="mono text-[10px] text-neutral-400">[YOU]</span>
+                                )}
+                              </div>
+
+                              <div className="mono dim text-xs mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
+                                <span className="text-neutral-300">{member.email}</span>
+                                {member.mobile && (
+                                  <>
+                                    <span className="text-neutral-600">·</span>
+                                    <span>{member.mobile}</span>
+                                  </>
+                                )}
+                              </div>
+
+                              {member.organisation && (
+                                <div className="text-xs text-neutral-400 mt-1 flex items-center gap-1.5">
+                                  <Building2 className="w-3 h-3 text-[var(--red2)] shrink-0" />
+                                  <span className="truncate">{member.organisation}</span>
                                 </div>
-                              ) : (
-                                <>
-                                  <span>{member.name}</span>
-                                  {isCurrentUser && (
-                                    <button
-                                      onClick={() => setIsEditingOwnName(true)}
-                                      className="text-neutral-500 hover:text-white"
-                                      title="Edit your name"
-                                    >
-                                      <Edit3 className="w-3 h-3" />
-                                    </button>
-                                  )}
-                                </>
                               )}
                             </div>
-                            <div className="mono dim text-xs mt-0.5">{member.email}</div>
                           </div>
-                        </div>
 
-                        <div>
-                          {member.isLead ? (
-                            <span className="badge live">Team Lead</span>
-                          ) : (
-                            <span className="badge">Member</span>
-                          )}
+                          {/* Member Actions */}
+                          <div className="flex items-center gap-2 shrink-0 self-end sm:self-center border-t sm:border-t-0 pt-2 sm:pt-0 border-[var(--border)]/40 w-full sm:w-auto justify-end">
+                            {isLead ? (
+                              <>
+                                <button
+                                  onClick={() => handleOpenEditMember(member)}
+                                  className="btn btn-ghost text-xs py-1 px-2.5 flex items-center gap-1"
+                                  title="Edit member information"
+                                >
+                                  <Edit3 className="w-3.5 h-3.5" />
+                                  <span>Edit</span>
+                                </button>
+
+                                {!member.isLead && (
+                                  <button
+                                    onClick={() => handleRemoveMember(member)}
+                                    disabled={removingMemberId === member._id}
+                                    className="btn btn-ghost text-xs py-1 px-2.5 text-red-400 hover:text-red-300 flex items-center gap-1"
+                                    title="Remove member from team"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5 text-red-500" />
+                                    <span>{removingMemberId === member._id ? 'Removing...' : 'Remove'}</span>
+                                  </button>
+                                )}
+                              </>
+                            ) : isCurrentUser ? (
+                              <button
+                                onClick={() => handleOpenEditMember(member)}
+                                className="btn btn-ghost text-xs py-1 px-2.5 flex items-center gap-1"
+                                title="Edit your details"
+                              >
+                                <Edit3 className="w-3.5 h-3.5" />
+                                <span>Edit</span>
+                              </button>
+                            ) : null}
+                          </div>
                         </div>
                       </div>
                     );
                   })}
                 </div>
 
-                <p className="dim" style={{ fontSize: 12.5, marginTop: 16 }}>
-                  Only your personal name is editable. Contact hackathon organizers to update registered email or modify team composition.
+                <p className="dim" style={{ fontSize: 12, marginTop: 18 }}>
+                  {isLead
+                    ? 'As Team Leader, you can add up to 5 members and update name, email, college/organisation, or phone number anytime.'
+                    : 'Team composition and member information are managed by your designated Team Leader.'}
                 </p>
               </div>
             </div>
@@ -671,6 +763,18 @@ export function MyTeamPage() {
             </div>
           </div>
         </div>
+
+        {/* Member Add / Edit Modal */}
+        <MemberModal
+          isOpen={isMemberModalOpen}
+          onClose={() => {
+            setIsMemberModalOpen(false);
+            setMemberToEdit(null);
+          }}
+          onSave={handleSaveMember}
+          initialData={memberToEdit}
+          isLead={memberToEdit?.isLead || false}
+        />
       </section>
     </div>
   );

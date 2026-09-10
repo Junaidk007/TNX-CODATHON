@@ -16,7 +16,7 @@ export function Footer() {
             <div className="fcol">
               <h4>ORGANIZED BY TECHNEEKX</h4>
               <p className="dim" style={{ maxWidth: 280, fontSize: 14 }}>
-                India's next generation AI &amp; Innovation Hackathon. Code. Transform. Innovate. An 8-hour offline sprint at AIMT, Lucknow.
+                India's next generation AI &amp; Innovation Hackathon. Code. Transform. Innovate. An 8-hour offline sprint at SRMCEM, Lucknow.
               </p>
             </div>
 
@@ -49,7 +49,7 @@ export function Footer() {
 
           <div className="foot-bottom">
             <span>© 2026 TechNeekX — Empowering Innovation</span>
-            <span>UNIT / TNX-2K26 · AIMT LUCKNOW · 19.08.2026</span>
+            <span>UNIT / TNX-2K26 · SRMCEM LUCKNOW · 19.08.2026</span>
           </div>
         </div>
       </footer>

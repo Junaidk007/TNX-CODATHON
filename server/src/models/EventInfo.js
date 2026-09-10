@@ -40,7 +40,7 @@ const eventInfoSchema = new mongoose.Schema(
     },
     venue: {
       type: String,
-      default: 'Shri Ramswaroop College Of Engineering and Manageme',
+      default: 'Shri Ramswaroop Memorial College of Engineering and Management (SRMCEM)',
       trim: true,
     },
     eventDates: {

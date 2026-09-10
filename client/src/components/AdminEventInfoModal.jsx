@@ -140,7 +140,7 @@ export const AdminEventInfoModal = ({ isOpen, onClose, token, onUpdated }) => {
                       required
                       value={location}
                       onChange={(e) => setLocation(e.target.value)}
-                      placeholder="e.g. AIMT, Lucknow"
+                      placeholder="e.g. SRMCEM, Lucknow"
                       className="w-full p-2 text-xs"
                     />
                   </div>

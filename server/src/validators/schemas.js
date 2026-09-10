@@ -57,6 +57,35 @@ const memberSchema = Joi.object({
   organisation: Joi.string().trim().allow('').max(200).optional(),
 });
 
+/**
+ * Joi Schema for adding a new team member
+ */
+export const addMemberSchema = Joi.object({
+  name: Joi.string().trim().min(2).max(100).required().messages({
+    'string.base': 'Name must be a string.',
+    'string.empty': 'Name cannot be empty.',
+    'string.min': 'Name must be at least 2 characters long.',
+    'string.max': 'Name cannot exceed 100 characters.',
+    'any.required': 'Name is required.',
+  }),
+  email: Joi.string().trim().email({ tlds: { allow: false } }).required().messages({
+    'string.email': 'A valid email address is required.',
+    'any.required': 'Email is required.',
+  }),
+  organisation: Joi.string().trim().allow('').max(200).optional(),
+  mobile: Joi.string().trim().allow('').max(20).optional(),
+});
+
+/**
+ * Joi Schema for updating an existing team member
+ */
+export const updateMemberSchema = Joi.object({
+  name: Joi.string().trim().min(2).max(100).optional(),
+  email: Joi.string().trim().email({ tlds: { allow: false } }).optional(),
+  organisation: Joi.string().trim().allow('').max(200).optional(),
+  mobile: Joi.string().trim().allow('').max(20).optional(),
+}).min(1);
+
 export const wildcardTeamSchema = Joi.object({
   teamName: Joi.string().trim().min(2).max(60).required(),
   regnId: Joi.string().trim().max(50).allow('').optional(),

@@ -100,4 +100,10 @@ export const api = {
   updateMyName: (name, token) => apiRequest('/users/me', { method: 'PATCH', data: { name }, token }),
   updateTeamName: (teamName, token) => apiRequest('/teams/me', { method: 'PATCH', data: { teamName }, token }),
   uploadTeamPPT: (formData, token) => apiRequest('/teams/me/ppt', { method: 'POST', data: formData, token }),
+  addMyTeamMember: (data, token) => apiRequest('/teams/me/members', { method: 'POST', data, token }),
+  updateMyTeamMember: (memberId, data, token) => apiRequest(`/teams/me/members/${memberId}`, { method: 'PATCH', data, token }),
+  removeMyTeamMember: (memberId, token) => apiRequest(`/teams/me/members/${memberId}`, { method: 'DELETE', token }),
+  addAdminTeamMember: (teamId, data, token) => apiRequest(`/admin/teams/${teamId}/members`, { method: 'POST', data, token }),
+  updateAdminTeamMember: (teamId, memberId, data, token) => apiRequest(`/admin/teams/${teamId}/members/${memberId}`, { method: 'PATCH', data, token }),
+  removeAdminTeamMember: (teamId, memberId, token) => apiRequest(`/admin/teams/${teamId}/members/${memberId}`, { method: 'DELETE', token }),
 };

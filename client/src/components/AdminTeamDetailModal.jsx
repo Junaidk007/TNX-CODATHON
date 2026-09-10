@@ -7,10 +7,13 @@ import {
   UserCheck,
   Loader2,
   FileText,
-  AlertCircle
+  AlertCircle,
+  UserPlus,
+  Trash2
 } from 'lucide-react';
 import { apiRequest } from '../services/api';
 import { NocDownloadButton } from './NocDownloadButton';
+import { MemberModal } from './MemberModal';
 
 export const AdminTeamDetailModal = ({ teamId, isOpen, onClose, token, onTeamUpdated }) => {
   const [team, setTeam] = useState(null);
@@ -24,6 +27,11 @@ export const AdminTeamDetailModal = ({ teamId, isOpen, onClose, token, onTeamUpd
   const [saving, setSaving] = useState(false);
   const [reassigningLeadId, setReassigningLeadId] = useState(null);
   const [eventInfo, setEventInfo] = useState(null);
+
+  // Member Management State
+  const [isMemberModalOpen, setIsMemberModalOpen] = useState(false);
+  const [memberToEdit, setMemberToEdit] = useState(null);
+  const [removingMemberId, setRemovingMemberId] = useState(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -90,6 +98,52 @@ export const AdminTeamDetailModal = ({ teamId, isOpen, onClose, token, onTeamUpd
       alert(err.message || 'Failed to reassign team lead');
     } finally {
       setReassigningLeadId(null);
+    }
+  };
+
+  const handleOpenAddMember = () => {
+    setMemberToEdit(null);
+    setIsMemberModalOpen(true);
+  };
+
+  const handleOpenEditMember = (member) => {
+    setMemberToEdit(member);
+    setIsMemberModalOpen(true);
+  };
+
+  const handleSaveMember = async (memberData) => {
+    if (memberToEdit?._id) {
+      const updated = await apiRequest(`/admin/teams/${teamId}/members/${memberToEdit._id}`, {
+        method: 'PATCH',
+        data: memberData,
+      });
+      setTeam(updated);
+    } else {
+      const updated = await apiRequest(`/admin/teams/${teamId}/members`, {
+        method: 'POST',
+        data: memberData,
+      });
+      setTeam(updated);
+    }
+    if (onTeamUpdated) onTeamUpdated();
+  };
+
+  const handleRemoveMember = async (member) => {
+    if (!window.confirm(`Are you sure you want to remove ${member.name} (${member.email}) from this team roster?`)) {
+      return;
+    }
+
+    setRemovingMemberId(member._id);
+    try {
+      const updated = await apiRequest(`/admin/teams/${teamId}/members/${member._id}`, {
+        method: 'DELETE',
+      });
+      setTeam(updated);
+      if (onTeamUpdated) onTeamUpdated();
+    } catch (err) {
+      alert(err.message || 'Failed to remove team member.');
+    } finally {
+      setRemovingMemberId(null);
     }
   };
 
@@ -237,8 +291,23 @@ export const AdminTeamDetailModal = ({ teamId, isOpen, onClose, token, onTeamUpd
 
             {/* Roster & Members */}
             <div className="bg-black/40 p-4 border border-[var(--border)] rounded space-y-3">
-              <div className="mono text-xs text-[var(--red2)] font-bold">
-                [ ROSTER MEMBERSHIP ({members.length + (lead ? 1 : 0)}) ]
+              <div className="flex items-center justify-between flex-wrap gap-2 pb-1 border-b border-[var(--border)]/50">
+                <div className="mono text-xs text-[var(--red2)] font-bold flex items-center gap-2">
+                  <span>[ ROSTER MEMBERSHIP ({members.length}/5) ]</span>
+                  {members.length < 5 && (
+                    <span className="text-[10px] text-neutral-400 font-normal">({5 - members.length} slots open)</span>
+                  )}
+                </div>
+                {members.length < 5 && (
+                  <button
+                    type="button"
+                    onClick={handleOpenAddMember}
+                    className="btn btn-primary text-xs py-1 px-2.5 flex items-center gap-1.5"
+                  >
+                    <UserPlus className="w-3.5 h-3.5" />
+                    <span>Add Member</span>
+                  </button>
+                )}
               </div>
 
               {/* Lead Entry */}
@@ -257,6 +326,15 @@ export const AdminTeamDetailModal = ({ teamId, isOpen, onClose, token, onTeamUpd
                       <div className="dim text-[11px] mt-0.5">{lead.organisation}</div>
                     )}
                   </div>
+                  <div className="flex items-center gap-1 shrink-0 self-start sm:self-center">
+                    <button
+                      onClick={() => handleOpenEditMember(lead)}
+                      className="mono text-xs text-neutral-300 hover:text-white flex items-center gap-1 px-2 py-1 rounded bg-black/40 hover:bg-black/80 border border-[var(--border)] transition-colors"
+                      title="Edit team leader details"
+                    >
+                      <Edit3 className="w-3 h-3" /> Edit
+                    </button>
+                  </div>
                 </div>
               )}
 
@@ -264,6 +342,7 @@ export const AdminTeamDetailModal = ({ teamId, isOpen, onClose, token, onTeamUpd
               {members.map((m) => {
                 if (m._id === lead?._id) return null;
                 const isReassigning = reassigningLeadId === m._id;
+                const isRemoving = removingMemberId === m._id;
 
                 return (
                   <div
@@ -284,14 +363,38 @@ export const AdminTeamDetailModal = ({ teamId, isOpen, onClose, token, onTeamUpd
                       )}
                     </div>
 
-                    <button
-                      onClick={() => handleReassignLead(m._id)}
-                      disabled={isReassigning}
-                      className="btn btn-ghost text-[10px] py-1 px-2.5 mono shrink-0 self-start sm:self-center"
-                      title="Promote this member to designated team lead"
-                    >
-                      {isReassigning ? 'Reassigning...' : 'Promote to Lead →'}
-                    </button>
+                    <div className="flex items-center gap-2 shrink-0 self-start sm:self-center flex-wrap">
+                      <button
+                        onClick={() => handleOpenEditMember(m)}
+                        className="mono text-xs text-neutral-300 hover:text-white flex items-center gap-1 px-2 py-1 rounded bg-black/40 hover:bg-black/80 border border-[var(--border)] transition-colors"
+                        title="Edit member details"
+                      >
+                        <Edit3 className="w-3 h-3" /> Edit
+                      </button>
+
+                      <button
+                        onClick={() => handleReassignLead(m._id)}
+                        disabled={isReassigning}
+                        className="btn btn-ghost text-[10px] py-1 px-2.5 mono"
+                        title="Promote this member to designated team lead"
+                      >
+                        {isReassigning ? 'Reassigning...' : 'Promote to Lead →'}
+                      </button>
+
+                      <button
+                        onClick={() => handleRemoveMember(m)}
+                        disabled={isRemoving}
+                        className="mono text-xs text-red-400 hover:text-red-300 flex items-center gap-1 px-2 py-1 rounded bg-red-950/20 hover:bg-red-950/40 border border-red-900/40 transition-colors"
+                        title="Remove member from roster"
+                      >
+                        {isRemoving ? (
+                          <Loader2 className="w-3 h-3 animate-spin" />
+                        ) : (
+                          <Trash2 className="w-3 h-3" />
+                        )}
+                        Remove
+                      </button>
+                    </div>
                   </div>
                 );
               })}
@@ -313,6 +416,17 @@ export const AdminTeamDetailModal = ({ teamId, isOpen, onClose, token, onTeamUpd
             Close
           </button>
         </div>
+
+        <MemberModal
+          isOpen={isMemberModalOpen}
+          onClose={() => {
+            setIsMemberModalOpen(false);
+            setMemberToEdit(null);
+          }}
+          onSave={handleSaveMember}
+          initialData={memberToEdit}
+          title={memberToEdit ? (memberToEdit._id === lead?._id ? 'Edit Team Leader' : 'Edit Member Details') : 'Add New Member'}
+        />
       </div>
     </div>
   );

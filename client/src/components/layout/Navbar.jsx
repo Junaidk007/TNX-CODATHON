@@ -57,7 +57,7 @@ export function Navbar() {
             <React.Fragment key={i}>
               <span>{hudStatus}</span>
               <span className="dot">•</span>
-              <span>REGN.MODE: OFFLINE @ AIMT, LUCKNOW</span>
+              <span>REGN.MODE: OFFLINE @ SRMCEM, LUCKNOW</span>
               <span className="dot">•</span>
               <span>ORGANIZED BY TECHNEEKX · POWERED BY UNSTOP</span>
               <span className="dot">•</span>
@@ -99,31 +99,35 @@ export function Navbar() {
           {/* Nav CTA / Auth */}
           <div className="nav-cta shrink-0 flex items-center gap-2">
             {isSignedIn ? (
-              <div className="hidden lg:flex items-center gap-3">
-                <div className="flex flex-col items-end text-right">
-                  <span className="text-xs font-bold uppercase tracking-wider text-white">
-                    {userProfile?.name || 'Authenticated'}
-                  </span>
-                  <span className="text-[10px] mono text-[var(--red2)] font-bold tracking-widest uppercase">
-                    {role === 'admin' ? 'ORGANIZER / ADMIN' : `${teamName || 'PARTICIPANT'} [${role?.toUpperCase() || 'MEMBER'}]`}
-                  </span>
+              <div className="flex items-center gap-2 sm:gap-3">
+                {/* Desktop User Info & Console/Team Button (Hidden on small screens) */}
+                <div className="hidden lg:flex items-center gap-3">
+                  <div className="flex flex-col items-end text-right">
+                    <span className="text-xs font-bold uppercase tracking-wider text-white">
+                      {userProfile?.name || 'Authenticated'}
+                    </span>
+                    <span className="text-[10px] mono text-[var(--red2)] font-bold tracking-widest uppercase">
+                      {role === 'admin' ? 'ORGANIZER / ADMIN' : `${teamName || 'PARTICIPANT'} [${role?.toUpperCase() || 'MEMBER'}]`}
+                    </span>
+                  </div>
+
+                  {role === 'admin' ? (
+                    <Link to="/admin" className="btn btn-primary text-xs py-1.5 px-4">
+                      Admin Console
+                    </Link>
+                  ) : (
+                    <Link to="/my-team" className="btn btn-primary text-xs py-1.5 px-4">
+                      My Team
+                    </Link>
+                  )}
                 </div>
 
-                {role === 'admin' ? (
-                  <Link to="/admin" className="btn btn-primary text-xs py-1.5 px-4">
-                    Admin Console
-                  </Link>
-                ) : (
-                  <Link to="/my-team" className="btn btn-primary text-xs py-1.5 px-4">
-                    My Team
-                  </Link>
-                )}
-
-                <div className="border-l border-[var(--border)] pl-2 flex items-center gap-2">
+                {/* Profile Picture: Visible on all screens */}
+                <div className="lg:border-l lg:border-[var(--border)] lg:pl-2 flex items-center gap-2">
                   <UserButton afterSignOutUrl="/" />
                   <button
                     onClick={() => logout()}
-                    className="btn btn-ghost text-xs py-1.5 px-3 text-neutral-300 hover:text-white inline-flex items-center gap-1.5"
+                    className="btn btn-ghost text-xs py-1.5 px-3 text-neutral-300 hover:text-white hidden lg:inline-flex items-center gap-1.5"
                     title="Sign Out"
                   >
                     <LogOut className="w-3.5 h-3.5 text-[var(--red2)]" />

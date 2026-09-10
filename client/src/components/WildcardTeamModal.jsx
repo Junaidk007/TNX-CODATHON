@@ -188,7 +188,7 @@ export const WildcardTeamModal = ({ isOpen, onClose, onTeamCreated, token }) => 
                     type="text"
                     value={lead.organisation}
                     onChange={(e) => setLead({ ...lead, organisation: e.target.value })}
-                    placeholder="e.g. AIMT Lucknow"
+                    placeholder="e.g. SRMCEM Lucknow"
                     className="w-full text-xs sm:text-sm"
                   />
                 </div>

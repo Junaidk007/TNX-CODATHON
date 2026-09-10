@@ -12,7 +12,7 @@ async function inspect() {
   const nonAdminUsers = await db.collection('users').countDocuments({ role: { $ne: 'admin' } });
   const totalTeams = await db.collection('teams').countDocuments();
   const ppts = await db.collection('teams').find({ ppt: { $exists: true, $ne: null, $nin: ['', null] } }, { projection: { teamName: 1, regnId: 1, ppt: 1 } }).toArray();
-  const eventInfo = await db.collection('eventinfos').countDocuments();
+  const eventInfo = await db.collection('eventinfos').findOne({});
 
   console.log(JSON.stringify({
     totalUsers,
@@ -21,7 +21,7 @@ async function inspect() {
     totalTeams,
     pptsCount: ppts.length,
     ppts,
-    eventInfoCount: eventInfo
+    eventInfo
   }, null, 2));
 
   await mongoose.disconnect();

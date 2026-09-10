@@ -12,8 +12,11 @@ import {
   wildcardTeamSchema, 
   adminTeamOverrideSchema, 
   reassignLeadSchema, 
-  eventInfoSchema 
+  eventInfoSchema,
+  addMemberSchema,
+  updateMemberSchema
 } from '../validators/schemas.js';
+import { addMemberToTeam, updateTeamMember, removeMemberFromTeam } from '../services/memberService.js';
 
 const router = express.Router();
 
@@ -282,6 +285,45 @@ router.patch('/teams/:teamId/lead', validateBody(reassignLeadSchema), async (req
       message: 'Team lead reassigned successfully',
       team: updatedTeam,
     });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * POST /api/admin/teams/:teamId/members
+ * Admin add member to team (max 5 members total)
+ */
+router.post('/teams/:teamId/members', validateBody(addMemberSchema), async (req, res, next) => {
+  try {
+    const updatedTeam = await addMemberToTeam(req.params.teamId, req.body);
+    res.status(201).json(updatedTeam);
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * PATCH /api/admin/teams/:teamId/members/:memberId
+ * Admin update team member information
+ */
+router.patch('/teams/:teamId/members/:memberId', validateBody(updateMemberSchema), async (req, res, next) => {
+  try {
+    const updatedTeam = await updateTeamMember(req.params.teamId, req.params.memberId, req.body);
+    res.status(200).json(updatedTeam);
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * DELETE /api/admin/teams/:teamId/members/:memberId
+ * Admin remove member from team
+ */
+router.delete('/teams/:teamId/members/:memberId', async (req, res, next) => {
+  try {
+    const updatedTeam = await removeMemberFromTeam(req.params.teamId, req.params.memberId);
+    res.status(200).json(updatedTeam);
   } catch (error) {
     next(error);
   }

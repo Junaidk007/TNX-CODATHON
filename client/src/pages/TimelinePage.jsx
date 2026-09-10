@@ -65,7 +65,7 @@ export function TimelinePage() {
             Hackathon <span className="grad-text">Flow</span>
           </h1>
           <p className="dim" style={{ maxWidth: 560, fontSize: 17, marginTop: 16 }}>
-            9 AM to 5 PM, five structured phases, one non-stop offline build day at AIMT, Lucknow.
+            9 AM to 5 PM, five structured phases, one non-stop offline build day at SRMCEM, Lucknow.
           </p>
 
           {/* Phase Summary Cards */}

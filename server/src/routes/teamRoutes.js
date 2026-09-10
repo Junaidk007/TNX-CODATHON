@@ -6,7 +6,8 @@ import { requireLeadOrAdmin } from '../middlewares/roleGuard.js';
 import { Team } from '../models/Team.js';
 import { uploadToCloudinary, getCloudinaryDownloadUrl } from '../config/cloudinary.js';
 import { pptUploadLimiter } from '../middlewares/rateLimiter.js';
-import { validateBody, updateTeamNameSchema } from '../validators/schemas.js';
+import { validateBody, updateTeamNameSchema, addMemberSchema, updateMemberSchema } from '../validators/schemas.js';
+import { addMemberToTeam, updateTeamMember, removeMemberFromTeam } from '../services/memberService.js';
 
 const router = express.Router();
 
@@ -219,6 +220,66 @@ router.post('/me/ppt', requireLeadOrAdmin, pptUploadLimiter, upload.single('file
       pptUrl,
       team,
     });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * POST /api/teams/me/members
+ * Add a new member to own team (Lead only, max 5 members)
+ */
+router.post('/me/members', requireLeadOrAdmin, validateBody(addMemberSchema), async (req, res, next) => {
+  try {
+    if (!req.user.teamId) {
+      return res.status(404).json({
+        error: 'NO_TEAM_ASSIGNED',
+        message: 'You are not assigned to any team.',
+      });
+    }
+
+    const updatedTeam = await addMemberToTeam(req.user.teamId, req.body);
+    res.status(201).json(updatedTeam);
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * PATCH /api/teams/me/members/:memberId
+ * Update a member's information on own team (Lead only)
+ */
+router.patch('/me/members/:memberId', requireLeadOrAdmin, validateBody(updateMemberSchema), async (req, res, next) => {
+  try {
+    if (!req.user.teamId) {
+      return res.status(404).json({
+        error: 'NO_TEAM_ASSIGNED',
+        message: 'You are not assigned to any team.',
+      });
+    }
+
+    const updatedTeam = await updateTeamMember(req.user.teamId, req.params.memberId, req.body);
+    res.status(200).json(updatedTeam);
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * DELETE /api/teams/me/members/:memberId
+ * Remove a member from own team (Lead only)
+ */
+router.delete('/me/members/:memberId', requireLeadOrAdmin, async (req, res, next) => {
+  try {
+    if (!req.user.teamId) {
+      return res.status(404).json({
+        error: 'NO_TEAM_ASSIGNED',
+        message: 'You are not assigned to any team.',
+      });
+    }
+
+    const updatedTeam = await removeMemberFromTeam(req.user.teamId, req.params.memberId);
+    res.status(200).json(updatedTeam);
   } catch (error) {
     next(error);
   }
