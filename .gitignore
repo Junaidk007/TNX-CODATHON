@@ -1,0 +1,14 @@
+node_modules
+.env
+.env.local
+*.log
+dist
+.DS_Store
+
+production.md 
+project.md
+chat-context.md
+finalistWeb.xlsx
+TNX_CODATHON_Team_NOC_Format.pdf (2).pdf
+
+designGuid
