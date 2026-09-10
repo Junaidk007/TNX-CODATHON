@@ -29,6 +29,7 @@ export function AuthProvider({ children }) {
   });
   const [blockedEmail, setBlockedEmail] = useState(null);
   const [profileLoading, setProfileLoading] = useState(false);
+  const [profileError, setProfileError] = useState(null);
   const [refreshCount, setRefreshCount] = useState(0);
 
   // Hook global token retriever into apiRequest
@@ -52,6 +53,7 @@ export function AuthProvider({ children }) {
       setUserProfile(null);
       setClerkToken(null);
       setBlockedEmail(null);
+      setProfileError(null);
       sessionStorage.removeItem(CACHE_PROFILE_KEY);
       sessionStorage.removeItem(CACHE_TOKEN_KEY);
       return null;
@@ -59,6 +61,7 @@ export function AuthProvider({ children }) {
 
     setProfileLoading(true);
     setBlockedEmail(null);
+    setProfileError(null);
 
     try {
       const token = await getToken();
@@ -68,11 +71,18 @@ export function AuthProvider({ children }) {
       }
 
       const profile = await apiRequest('/users/me', { token });
+
+      // Validate that profile is a real user object
+      if (!profile || typeof profile !== 'object' || !profile.email) {
+        throw new Error('Invalid user profile response from server.');
+      }
+
       setUserProfile(profile);
       sessionStorage.setItem(CACHE_PROFILE_KEY, JSON.stringify(profile));
       return profile;
     } catch (err) {
       console.error('[AuthContext] Failed to resolve user profile:', err);
+      setProfileError(err.message || 'Unable to connect to backend server');
       if (err.status === 403 || err.code === 'EMAIL_NOT_REGISTERED') {
         const detectedEmail =
           user?.primaryEmailAddress?.emailAddress ||
@@ -115,6 +125,7 @@ export function AuthProvider({ children }) {
     setUserProfile(null);
     setClerkToken(null);
     setBlockedEmail(null);
+    setProfileError(null);
     if (typeof signOut === 'function') {
       await signOut();
     }
@@ -134,6 +145,7 @@ export function AuthProvider({ children }) {
     clerkToken,
     blockedEmail,
     profileLoading,
+    profileError,
     refreshProfile: () => setRefreshCount((c) => c + 1),
     login,
     logout,

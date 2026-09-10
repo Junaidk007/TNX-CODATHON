@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { UserButton } from '@clerk/clerk-react';
-import { Menu, X, Flame, Shield, ArrowRight } from 'lucide-react';
+import { Menu, X, Flame, Shield, ArrowRight, LogOut } from 'lucide-react';
 import { useAuthContext } from '../../context/AuthContext';
 
 export function Navbar() {
@@ -98,14 +98,14 @@ export function Navbar() {
 
           {/* Nav CTA / Auth */}
           <div className="nav-cta shrink-0">
-            {isSignedIn && userProfile ? (
+            {isSignedIn ? (
               <div className="flex items-center gap-3">
                 <div className="hidden lg:flex flex-col items-end text-right">
                   <span className="text-xs font-bold uppercase tracking-wider text-white">
-                    {userProfile.name}
+                    {userProfile?.name || 'Authenticated'}
                   </span>
                   <span className="text-[10px] mono text-[var(--red2)] font-bold tracking-widest uppercase">
-                    {role === 'admin' ? 'ORGANIZER / ADMIN' : `${teamName || 'PARTICIPANT'} [${role?.toUpperCase()}]`}
+                    {role === 'admin' ? 'ORGANIZER / ADMIN' : `${teamName || 'PARTICIPANT'} [${role?.toUpperCase() || 'MEMBER'}]`}
                   </span>
                 </div>
 
@@ -119,15 +119,20 @@ export function Navbar() {
                   </Link>
                 )}
 
-                <div className="border-l border-[var(--border)] pl-2">
+                <div className="border-l border-[var(--border)] pl-2 flex items-center gap-2">
                   <UserButton afterSignOutUrl="/" />
+                  <button
+                    onClick={() => logout()}
+                    className="btn btn-ghost text-xs py-1.5 px-3 text-neutral-300 hover:text-white inline-flex items-center gap-1.5"
+                    title="Sign Out"
+                  >
+                    <LogOut className="w-3.5 h-3.5 text-[var(--red2)]" />
+                    <span className="hidden xl:inline">Sign Out</span>
+                  </button>
                 </div>
               </div>
             ) : (
               <div className="flex items-center gap-3">
-                {/* <Link to="/admin" className="btn btn-ghost hidden md:inline-flex">
-                  Admin
-                </Link> */}
                 <Link to="/my-team" className="btn btn-primary hidden md:inline-flex">
                   My Team
                 </Link>
@@ -168,10 +173,10 @@ export function Navbar() {
             </div>
 
             <div className="pt-4 border-t border-[var(--border)] flex flex-col gap-3">
-              {isSignedIn && (
+              {isSignedIn ? (
                 <>
                   <div className="text-xs text-neutral-400 mono">
-                    Logged in as <strong className="text-white">{userProfile?.name}</strong> ({role})
+                    Logged in as <strong className="text-white">{userProfile?.name || 'User'}</strong> ({role || 'Session Active'})
                   </div>
                   <Link
                     to={role === 'admin' ? '/admin' : '/my-team'}
@@ -180,7 +185,25 @@ export function Navbar() {
                   >
                     Open {role === 'admin' ? 'Admin Portal' : 'My Team Portal'} →
                   </Link>
+                  <button
+                    onClick={async () => {
+                      setMobileOpen(false);
+                      await logout();
+                    }}
+                    className="btn btn-ghost w-full text-center text-xs text-red-400 flex items-center justify-center gap-2 py-2.5"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    <span>Sign Out</span>
+                  </button>
                 </>
+              ) : (
+                <Link
+                  to="/my-team"
+                  onClick={() => setMobileOpen(false)}
+                  className="btn btn-primary w-full text-center"
+                >
+                  Sign In / My Team →
+                </Link>
               )}
             </div>
           </div>

@@ -62,6 +62,18 @@ export async function apiRequest(endpoint, { method = 'GET', data, token, header
 
   try {
     const response = await fetch(url, config);
+    const contentType = response.headers.get('content-type') || '';
+
+    if (!contentType.includes('application/json')) {
+      const text = await response.text().catch(() => '');
+      if (text.includes('<!DOCTYPE html>') || text.includes('<html') || !response.ok) {
+        const error = new Error('Backend API unreachable or misconfigured (received HTML instead of JSON). Please check VITE_API_URL.');
+        error.status = response.status === 200 ? 503 : response.status;
+        error.code = 'BACKEND_UNREACHABLE';
+        throw error;
+      }
+    }
+
     const result = await response.json().catch(() => ({}));
 
     if (!response.ok) {

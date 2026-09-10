@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuthContext } from '../context/AuthContext';
 import { apiRequest } from '../services/api';
 import {
@@ -18,7 +19,7 @@ import {
 import { NocDownloadButton } from '../components/NocDownloadButton';
 
 export function MyTeamPage() {
-  const { userProfile, clerkToken, refreshProfile, setUserProfile } = useAuthContext();
+  const { userProfile, role, logout, clerkToken, refreshProfile, setUserProfile } = useAuthContext();
 
   const [team, setTeam] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -150,6 +151,28 @@ export function MyTeamPage() {
     }
   };
 
+  if (role === 'admin') {
+    return (
+      <div className="wrap py-16">
+        <div className="hud-frame p-8 sm:p-10 text-center max-w-lg mx-auto">
+          <div className="eyebrow justify-center">ORGANIZER CONSOLE</div>
+          <h2 className="text-2xl font-black mt-2">ADMIN ACCOUNT DETECTED</h2>
+          <p className="dim text-sm mt-3 leading-relaxed">
+            You are logged in with administrator privileges ({userProfile?.email}). Organizers do not have a team roster.
+          </p>
+          <div className="mt-6 flex flex-col sm:flex-row justify-center gap-3">
+            <Link to="/admin" className="btn btn-primary">
+              Open Admin Console →
+            </Link>
+            <button onClick={() => logout()} className="btn btn-ghost">
+              Sign Out
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (loading && !team) {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center p-6">
@@ -171,9 +194,17 @@ export function MyTeamPage() {
           <AlertCircle className="w-8 h-8 text-[var(--red2)] mx-auto mb-3" />
           <h2 className="text-xl font-bold">Failed to load team</h2>
           <p className="dim text-sm mt-2">{error}</p>
-          <button onClick={fetchMyTeam} className="btn btn-primary mt-6">
-            Retry Sync
-          </button>
+          <div className="mt-6 flex flex-wrap justify-center gap-3">
+            <button onClick={fetchMyTeam} className="btn btn-primary">
+              Retry Sync
+            </button>
+            <button onClick={() => logout()} className="btn btn-ghost">
+              Sign Out
+            </button>
+            <Link to="/" className="btn btn-ghost">
+              Back to Home
+            </Link>
+          </div>
         </div>
       </div>
     );

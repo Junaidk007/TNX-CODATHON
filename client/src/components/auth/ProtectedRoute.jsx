@@ -5,12 +5,16 @@ import { BlockedUserNotice } from '../BlockedUserNotice';
 
 export function ProtectedRoute({ children, requiredRole }) {
   const {
+    user,
     isAuthReady,
     isSignedIn,
     userProfile,
     role,
     blockedEmail,
+    profileError,
+    refreshProfile,
     login,
+    logout,
   } = useAuthContext();
 
   // 1. Session verification in-flight: Show HUD telemetry loader without jumping or prompting prematurely
@@ -75,8 +79,41 @@ export function ProtectedRoute({ children, requiredRole }) {
     );
   }
 
-  // 4. Role restriction: e.g. participant trying to view admin
+  // 4. Backend connection error (e.g. backend offline or VITE_API_URL misconfigured)
+  if (profileError && !userProfile) {
+    return (
+      <div className="min-h-[60vh] flex flex-col items-center justify-center p-6">
+        <div className="hud-frame p-8 sm:p-10 max-w-lg text-center w-full">
+          <div className="eyebrow justify-center" style={{ color: 'var(--red2)' }}>
+            BACKEND CONNECTION ERROR
+          </div>
+          <h2 className="text-2xl font-black mt-2">CANNOT REACH SERVER</h2>
+          <p className="dim text-sm mt-3 leading-relaxed">
+            {profileError}
+          </p>
+          <div className="p-3 bg-black/50 border border-[var(--border)] rounded text-xs mono mt-4 text-left space-y-1">
+            <div className="text-neutral-400">Account: <span className="text-white font-bold">{user?.primaryEmailAddress?.emailAddress || 'Logged in'}</span></div>
+            <div className="dim text-[11px]">Please ensure the backend API server is deployed and online.</div>
+          </div>
+          <div className="mt-6 flex flex-col sm:flex-row justify-center gap-3">
+            <button onClick={() => refreshProfile()} className="btn btn-primary">
+              Retry Sync
+            </button>
+            <button onClick={() => logout()} className="btn btn-ghost">
+              Sign Out
+            </button>
+            <Link to="/" className="btn btn-ghost">
+              Back to Home
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // 5. Role restriction: e.g. participant trying to view admin
   if (requiredRole === 'admin' && role !== 'admin') {
+    const currentEmail = userProfile?.email || user?.primaryEmailAddress?.emailAddress;
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center p-6">
         <div className="hud-frame p-8 sm:p-10 max-w-lg text-center w-full">
@@ -85,14 +122,17 @@ export function ProtectedRoute({ children, requiredRole }) {
           </div>
           <h2 className="text-2xl font-black mt-2">ADMIN PRIVILEGES REQUIRED</h2>
           <p className="dim text-sm mt-3 leading-relaxed">
-            Your account ({userProfile?.email}) is registered with role{' '}
+            Your account ({currentEmail || 'unidentified'}) is registered with role{' '}
             <strong className="text-white uppercase font-bold">{role || 'PARTICIPANT'}</strong>.
             The Admin Console is reserved for hackathon organizers.
           </p>
-          <div className="mt-6 flex justify-center gap-4">
+          <div className="mt-6 flex flex-col sm:flex-row justify-center gap-3">
             <Link to="/my-team" className="btn btn-primary">
               Go to My Team Portal →
             </Link>
+            <button onClick={() => logout()} className="btn btn-ghost">
+              Sign Out / Switch Account
+            </button>
           </div>
         </div>
       </div>
