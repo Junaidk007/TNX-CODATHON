@@ -97,10 +97,10 @@ export function Navbar() {
           </nav>
 
           {/* Nav CTA / Auth */}
-          <div className="nav-cta shrink-0">
+          <div className="nav-cta shrink-0 flex items-center gap-2">
             {isSignedIn ? (
-              <div className="flex items-center gap-3">
-                <div className="hidden lg:flex flex-col items-end text-right">
+              <div className="hidden lg:flex items-center gap-3">
+                <div className="flex flex-col items-end text-right">
                   <span className="text-xs font-bold uppercase tracking-wider text-white">
                     {userProfile?.name || 'Authenticated'}
                   </span>
@@ -110,11 +110,11 @@ export function Navbar() {
                 </div>
 
                 {role === 'admin' ? (
-                  <Link to="/admin" className="btn btn-primary text-xs py-1.5 px-4 hidden md:inline-flex">
+                  <Link to="/admin" className="btn btn-primary text-xs py-1.5 px-4">
                     Admin Console
                   </Link>
                 ) : (
-                  <Link to="/my-team" className="btn btn-primary text-xs py-1.5 px-4 hidden md:inline-flex">
+                  <Link to="/my-team" className="btn btn-primary text-xs py-1.5 px-4">
                     My Team
                   </Link>
                 )}
@@ -132,8 +132,8 @@ export function Navbar() {
                 </div>
               </div>
             ) : (
-              <div className="flex items-center gap-3">
-                <Link to="/my-team" className="btn btn-primary hidden md:inline-flex">
+              <div className="flex items-center gap-2">
+                <Link to="/my-team" className="btn btn-primary text-xs py-1.5 px-3 sm:px-4">
                   My Team
                 </Link>
               </div>
