@@ -200,7 +200,7 @@ header.nav {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 0;
+  padding: 12px 10px;
 }
 
 .brand {
@@ -405,60 +405,6 @@ input[class*="cl-formFieldInput"]:focus {
 .cl-formFieldInput::placeholder,
 input[class*="cl-formFieldInput"]::placeholder {
   color: #9ca3af !important;
-}
-
-/* CLERK OTP CODE FIELD FIX — PRESERVE INDIVIDUAL DIGIT SLOTS */
-.cl-otpCodeField,
-.cl-otpCodeFieldInputs,
-[class*="otpCodeField"],
-[class*="otpCode"] {
-  display: flex !important;
-  justify-content: center !important;
-  gap: 8px !important;
-  position: relative !important;
-}
-
-.cl-otpCodeFieldSlot,
-[class*="otpCodeFieldSlot"] {
-  width: 44px !important;
-  height: 48px !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  border: 1.5px solid #d1d5db !important;
-  border-radius: 8px !important;
-  background-color: #ffffff !important;
-  font-size: 20px !important;
-  font-weight: 700 !important;
-  color: #111827 !important;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
-}
-
-.cl-otpCodeFieldSlot[data-status="focused"],
-.cl-otpCodeFieldSlot:focus-within,
-[class*="otpCodeFieldSlot"][data-status="focused"] {
-  border-color: #2563eb !important;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
-}
-
-/* The transparent overlay input for typing OTP code */
-.cl-otpCodeFieldInput,
-[class*="otpCodeFieldInput"],
-[class*="otpCodeField"] input {
-  position: absolute !important;
-  inset: 0 !important;
-  width: 100% !important;
-  height: 100% !important;
-  opacity: 0 !important;
-  background: transparent !important;
-  background-color: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  padding: 0 !important;
-  margin: 0 !important;
-  cursor: text !important;
-  pointer-events: auto !important;
 }
 
 /* MODAL FIXES */

@@ -148,7 +148,10 @@ export function Navbar() {
         {/* Mobile Nav Drawer */}
         {mobileOpen && (
           <div className="lg:hidden border-t border-[var(--border)] bg-[#0c0c0c] px-6 py-5 space-y-4">
-            <div className="flex flex-col space-y-3 mono text-sm uppercase">
+            <div className="flex flex-col space-y-3 mono text-sm uppercase" style={{
+              gap: '1rem',
+              padding: '1rem'
+            }}>
               {navLinks.map((link) => {
                 const isActive = location.pathname === link.path;
                 return (
@@ -165,7 +168,7 @@ export function Navbar() {
             </div>
 
             <div className="pt-4 border-t border-[var(--border)] flex flex-col gap-3">
-              {isSignedIn ? (
+              {isSignedIn && (
                 <>
                   <div className="text-xs text-neutral-400 mono">
                     Logged in as <strong className="text-white">{userProfile?.name}</strong> ({role})
@@ -176,23 +179,6 @@ export function Navbar() {
                     className="btn btn-primary w-full text-center"
                   >
                     Open {role === 'admin' ? 'Admin Portal' : 'My Team Portal'} →
-                  </Link>
-                </>
-              ) : (
-                <>
-                  <Link
-                    to="/admin"
-                    onClick={() => setMobileOpen(false)}
-                    className="btn btn-ghost w-full text-center"
-                  >
-                    Admin Portal
-                  </Link>
-                  <Link
-                    to="/my-team"
-                    onClick={() => setMobileOpen(false)}
-                    className="btn btn-primary w-full text-center"
-                  >
-                    My Team Access →
                   </Link>
                 </>
               )}
