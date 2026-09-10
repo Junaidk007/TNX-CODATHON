@@ -130,10 +130,10 @@ export function ContactPage() {
                   VENUE
                 </div>
                 <div style={{ marginTop: 6, fontWeight: 600, fontSize: 16 }}>
-                  Ambalika Institute of Management &amp; Technology
+                  Shri Ramswaroop College Of Engineering and Management
                 </div>
                 <div className="dim" style={{ fontSize: 14, marginTop: 4 }}>
-                  Maurawan Road, Mohanlalganj, Lucknow, Uttar Pradesh 226301
+                  403/405, Faizabad Road, Lucknow, Uttar Pradesh, 226001
                 </div>
               </div>
             </div>
