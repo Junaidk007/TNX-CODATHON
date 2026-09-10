@@ -26,7 +26,14 @@ app.use(express.urlencoded({ extended: true }));
 
 // 2. Clerk Middleware (attaches auth context if configured)
 if (process.env.CLERK_SECRET_KEY && !process.env.CLERK_SECRET_KEY.startsWith('sk_test_...')) {
-  app.use(clerkMiddleware());
+  const clerk = clerkMiddleware();
+  app.use((req, res, next) => {
+    // Skip Clerk middleware for PPT routes so browser navigation doesn't trigger 307 handshake redirects
+    if (req.path.includes('/ppt')) {
+      return next();
+    }
+    return clerk(req, res, next);
+  });
 }
 
 // 3. Health & Public Info Routes

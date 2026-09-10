@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuthContext } from '../context/AuthContext';
-import { apiRequest } from '../services/api';
+import { apiRequest, openTeamDeck } from '../services/api';
 import { AdminImportModal } from '../components/AdminImportModal';
 import { WildcardTeamModal } from '../components/WildcardTeamModal';
 import { AdminEventInfoModal } from '../components/AdminEventInfoModal';
@@ -329,7 +329,15 @@ export function AdminPage() {
 
                         <td style={{ padding: '14px 10px' }}>
                           {t.ppt ? (
-                            <span className="badge live">Uploaded</span>
+                            <button
+                              type="button"
+                              onClick={() => openTeamDeck(t)}
+                              className="badge live hover:bg-emerald-500/20 cursor-pointer inline-flex items-center gap-1"
+                              title="Click to view presentation deck"
+                            >
+                              <span>Uploaded</span>
+                              <ExternalLink className="w-2.5 h-2.5" />
+                            </button>
                           ) : (
                             <span className="badge">Pending</span>
                           )}

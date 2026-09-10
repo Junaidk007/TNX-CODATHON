@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuthContext } from '../context/AuthContext';
-import { apiRequest } from '../services/api';
+import { apiRequest, openTeamDeck, getTeamDeckDirectUrl } from '../services/api';
 import {
   UploadCloud,
   FileCheck,
@@ -613,10 +613,14 @@ export function MyTeamPage() {
 
                     <div style={{ marginTop: 14 }}>
                       <a
-                        href={`/api/teams/${team._id || team.id || team.regnId}/ppt`}
+                        href={getTeamDeckDirectUrl(team)}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          openTeamDeck(team);
+                        }}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="btn btn-ghost text-xs py-1.5 px-3.5 inline-flex items-center gap-2"
+                        className="btn btn-ghost text-xs py-1.5 px-3 inline-flex items-center gap-2 cursor-pointer"
                       >
                         <ExternalLink className="w-3.5 h-3.5" /> View Current Deck
                       </a>

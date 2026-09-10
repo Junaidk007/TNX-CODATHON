@@ -91,6 +91,50 @@ export async function apiRequest(endpoint, { method = 'GET', data, token, header
   }
 }
 
+/**
+ * Open a team's presentation deck safely in a new tab
+ * Resolves Cloudinary signed delivery URL to avoid 401 ACL/delivery restrictions
+ */
+export async function openTeamDeck(team) {
+  if (!team) return;
+  const teamIdentifier = team._id || team.id || team.regnId;
+  if (!teamIdentifier) {
+    alert('Invalid team identifier');
+    return;
+  }
+
+  // Pre-open a blank tab synchronously to prevent browser popup blockers
+  const newTab = window.open('about:blank', '_blank');
+  try {
+    const res = await apiRequest(`/teams/${teamIdentifier}/ppt?json=true`);
+    const finalUrl = res?.url || team.ppt;
+    if (finalUrl) {
+      if (newTab) newTab.location.href = finalUrl;
+      else window.open(finalUrl, '_blank');
+    } else {
+      if (newTab) newTab.close();
+      alert('Presentation deck not found.');
+    }
+  } catch (err) {
+    console.error('Failed to open presentation deck:', err);
+    if (team.ppt && newTab) {
+      newTab.location.href = team.ppt;
+    } else {
+      if (newTab) newTab.close();
+      alert(err.message || 'Failed to open presentation deck.');
+    }
+  }
+}
+
+/**
+ * Get direct backend route URL for presentation deck
+ */
+export function getTeamDeckDirectUrl(team) {
+  const teamIdentifier = team?._id || team?.id || team?.regnId;
+  const baseUrl = (API_BASE_URL || '/api').replace(/\/$/, '');
+  return `${baseUrl}/teams/${teamIdentifier}/ppt`;
+}
+
 export const api = {
   getHealth: () => apiRequest('/health'),
   getEventInfo: () => apiRequest('/event-info'),
@@ -106,4 +150,6 @@ export const api = {
   addAdminTeamMember: (teamId, data, token) => apiRequest(`/admin/teams/${teamId}/members`, { method: 'POST', data, token }),
   updateAdminTeamMember: (teamId, memberId, data, token) => apiRequest(`/admin/teams/${teamId}/members/${memberId}`, { method: 'PATCH', data, token }),
   removeAdminTeamMember: (teamId, memberId, token) => apiRequest(`/admin/teams/${teamId}/members/${memberId}`, { method: 'DELETE', token }),
+  openTeamDeck,
+  getTeamDeckDirectUrl,
 };

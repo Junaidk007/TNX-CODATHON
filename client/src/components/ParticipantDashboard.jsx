@@ -17,7 +17,7 @@ import {
   ChevronRight,
   Flame
 } from 'lucide-react';
-import { apiRequest } from '../services/api';
+import { apiRequest, openTeamDeck, getTeamDeckDirectUrl } from '../services/api';
 import { NocDownloadButton } from './NocDownloadButton';
 
 export const ParticipantDashboard = ({ userProfile, token, onProfileUpdate, eventInfo: propEventInfo }) => {
@@ -263,10 +263,14 @@ export const ParticipantDashboard = ({ userProfile, token, onProfileUpdate, even
 
               {team.ppt && (
                 <a
-                  href={`/api/teams/${team._id || team.id || team.regnId}/ppt`}
+                  href={getTeamDeckDirectUrl(team)}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    openTeamDeck(team);
+                  }}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 px-3 py-1 bg-black text-white hover:bg-[#e10600] text-xs font-bold font-mono uppercase transition-colors"
+                  className="inline-flex items-center gap-1.5 px-3 py-1 bg-black text-white hover:bg-[#e10600] text-xs font-bold font-mono uppercase transition-colors cursor-pointer"
                 >
                   <span>View PPT</span>
                   <ExternalLink className="w-3.5 h-3.5" />
@@ -326,10 +330,14 @@ export const ParticipantDashboard = ({ userProfile, token, onProfileUpdate, even
                 </div>
                 {team.ppt && (
                   <a
-                    href={`/api/teams/${team._id || team.id || team.regnId}/ppt`}
+                    href={getTeamDeckDirectUrl(team)}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      openTeamDeck(team);
+                    }}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 mt-2 px-4 py-2 bg-black text-white hover:bg-[#e10600] text-xs font-bold font-mono uppercase transition-colors"
+                    className="inline-flex items-center gap-1.5 mt-2 px-4 py-2 bg-black text-white hover:bg-[#e10600] text-xs font-bold font-mono uppercase transition-colors cursor-pointer"
                   >
                     <span>Download Deck</span>
                     <ExternalLink className="w-3.5 h-3.5" />

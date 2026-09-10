@@ -11,7 +11,7 @@ import {
   UserPlus,
   Trash2
 } from 'lucide-react';
-import { apiRequest } from '../services/api';
+import { apiRequest, openTeamDeck, getTeamDeckDirectUrl } from '../services/api';
 import { NocDownloadButton } from './NocDownloadButton';
 import { MemberModal } from './MemberModal';
 
@@ -278,10 +278,14 @@ export const AdminTeamDetailModal = ({ teamId, isOpen, onClose, token, onTeamUpd
 
                 {team.ppt && (
                   <a
-                    href={`/api/teams/${team._id || team.id || team.regnId}/ppt`}
+                    href={getTeamDeckDirectUrl(team)}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      openTeamDeck(team);
+                    }}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="btn btn-ghost text-xs py-1.5 px-3.5 mt-3 inline-flex items-center gap-2 w-max"
+                    className="btn btn-ghost text-xs py-1.5 px-3.5 mt-3 inline-flex items-center gap-2 w-max cursor-pointer"
                   >
                     <ExternalLink className="w-3.5 h-3.5" /> View Uploaded Deck
                   </a>
