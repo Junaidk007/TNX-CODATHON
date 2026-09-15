@@ -95,7 +95,7 @@ export function HomePage() {
           </h1>
 
           <p className="dim" style={{ maxWidth: 580, fontSize: 18, marginTop: 22 }}>
-            TNX Codathon 2K26 — an 8-hour non-stop build sprint at Ambalika Institute of Management &amp;
+            TNX Codathon 2K26 — an 8-hour non-stop build sprint at SRM Collage of Engineering and Management&amp;
             Technology. Organized by TechNeekX. Bring your ideas to life, offline, on the ground, with the
             people who'll build them with you.
           </p>
